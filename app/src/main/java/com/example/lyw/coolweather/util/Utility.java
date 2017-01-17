@@ -1,6 +1,7 @@
 package com.example.lyw.coolweather.util;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.example.lyw.coolweather.db.City;
 import com.example.lyw.coolweather.db.County;
@@ -15,7 +16,7 @@ import org.json.JSONObject;
  */
 
 public class Utility {
-
+    private static final String TAG = "Utility";
     /**
      * 解析和处理服务器返回的省级数据
      */
@@ -24,7 +25,7 @@ public class Utility {
                 try {
                     JSONArray jsonArray = new JSONArray(response);
                     for (int i = 0;i< jsonArray.length();i++){
-                        JSONObject jsonObject = new JSONObject();
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
                         Province province = new Province();
                         province.setProvinceCode(jsonObject.getInt("id"));
                         province.setProvinceName(jsonObject.getString("name"));
@@ -47,7 +48,7 @@ public class Utility {
             try {
                 JSONArray jsonArray = new JSONArray(response);
                 for (int i = 0;i< jsonArray.length();i++){
-                    JSONObject jsonObject = new JSONObject();
+                    JSONObject jsonObject =jsonArray.getJSONObject(i);
                     City city = new City();
                     city.setCityCode(jsonObject.getInt("id"));
                     city.setCityName(jsonObject.getString("name"));
@@ -70,14 +71,16 @@ public class Utility {
               try {
                   JSONArray jsonArray = new JSONArray(response);
                   for (int i = 0;i< jsonArray.length();i++){
-                      JSONObject jsonObject = new JSONObject();
+                      JSONObject jsonObject = jsonArray.getJSONObject(i);
                       County county = new County();
                       county.setCountyName(jsonObject.getString("name"));
                       county.setCityId(jsonObject.getInt("id"));
-                      county.setWeatherId(jsonObject.getInt("weather_id"));
+                      county.setWeatherId(jsonObject.getString("weather_id"));
                       county.setCityId(cityId);
                       county.save();
+                      Log.d(TAG, "cuntyList size is ");
                   }
+
                   return true ;
               } catch (JSONException e) {
                   e.printStackTrace();

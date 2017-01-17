@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,6 +83,7 @@ public class ChooseAreaFragment extends Fragment {
      */
     private int currentlevel;
 
+    private static final String TAG = "ChooseAreaFragment";
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup
@@ -90,9 +92,9 @@ public class ChooseAreaFragment extends Fragment {
         titleText = (TextView) view.findViewById(R.id.id_title_text);
         backButton = (Button) view.findViewById(R.id.id_button_back);
         listView = (ListView) view.findViewById(R.id.id_list_view);
-        adapter = new ArrayAdapter<String>(getContext(), android.R.layout
+        adapter = new ArrayAdapter<>(getContext(), android.R.layout
                 .simple_list_item_1, dataList);
-
+        listView.setAdapter(adapter);
         return view;
     }
 
@@ -127,10 +129,11 @@ public class ChooseAreaFragment extends Fragment {
                 }
             }
         });
+        queryProvince();
     }
 
     private void queryCounty() {
-        titleText.setText(selectedCounty.getCountyName());
+        titleText.setText(selectedCity.getCityName());
         backButton.setVisibility(View.VISIBLE);
         countyList = DataSupport.where(ID_CITY, String.valueOf(selectedCity
                 .getId())).find(County.class);
@@ -144,15 +147,17 @@ public class ChooseAreaFragment extends Fragment {
             currentlevel = LEVEL_COUNTY;
         } else {
             queryFromSever(ADDRESS_PROVINCE + "/" + selectedProvince
-                            .getProvinceCode() + "/" + selectedCounty
-                            .getCityId(),
+                            .getProvinceCode() + "/" + selectedCity
+                            .getCityCode(),
                     "county");
-
+            Log.d(TAG, "queryCounty: "+ADDRESS_PROVINCE + "/" + selectedProvince
+                    .getProvinceCode() + "/" + selectedCity
+                    .getCityCode());
         }
     }
 
     private void queryCities() {
-        titleText.setText(selectedCity.getCityName());
+        titleText.setText(selectedProvince.getProvinceName());
         backButton.setVisibility(View.VISIBLE);
         cityList = DataSupport.where(ID_PROVINCE, String.valueOf
                 (selectedProvince.getId())).find(City.class);
@@ -210,7 +215,7 @@ public class ChooseAreaFragment extends Fragment {
             @Override
             public void onResponse(Call call, Response response) throws
                     IOException {
-                String responseText = response.body().toString();
+                String responseText = response.body().string();
                 boolean result = false;
                 if ("province".equals(type)) {
                     result = Utility.handleProvinceResponse(responseText);
@@ -220,6 +225,7 @@ public class ChooseAreaFragment extends Fragment {
                 } else if ("county".equals(type)) {
                     result = Utility.handleCountyResponse(responseText,
                             selectedCity.getId());
+                    Log.d(TAG, "result is" +result);
                 }
 
                 if (result) {
